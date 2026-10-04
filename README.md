@@ -12,7 +12,7 @@ Aplicación móvil para explorar lugares de interés, crear planes de visita y c
 ## Requisitos previos
 
 - Node.js instalado
-- Expo Go instalado en tu dispositivo móvil
+- Expo Go instalado en tu dispositivo móvil (versión 57)
 - Cuenta en Supabase
 
 ## Instalación
