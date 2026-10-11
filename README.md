@@ -8,6 +8,7 @@ Aplicación móvil para explorar lugares de interés, crear planes de visita y c
 - **TypeScript**
 - **Supabase** (base de datos y autenticación)
 - **React Navigation** (navegación entre pantallas)
+- **Expo Secure Store** (sesión persistente)
 
 ## Requisitos previos
 

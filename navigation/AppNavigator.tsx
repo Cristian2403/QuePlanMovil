@@ -6,10 +6,14 @@ import { useEffect, useState } from 'react'
 import { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import HomeScreen from '../screens/HomeScreen'
+import RegisterBusinessScreen from '../screens/RegisterBusinessScreen'
+
+
 
 export type RootStackParamList = {
   Login: undefined
   Register: undefined
+  RegisterBusiness: undefined
   Home: undefined
 }
 
@@ -47,6 +51,7 @@ export default function AppNavigator() {
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen name="RegisterBusiness" component={RegisterBusinessScreen} />
           </>
         )}
       </Stack.Navigator>

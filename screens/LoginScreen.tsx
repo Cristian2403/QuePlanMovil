@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import {View, Text, TextInput, TouchableOpacity, StyleSheet, Alert} from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import { supabase } from '../lib/supabase'
 import { useFonts, Pacifico_400Regular } from '@expo-google-fonts/pacifico'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -11,7 +11,7 @@ type Props = {
 }
 
 
-export default function LoginScreen({navigation}: Props) {
+export default function LoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState<string>('')
   const [contrasena, setContrasena] = useState<string>('')
 
@@ -76,6 +76,16 @@ export default function LoginScreen({navigation}: Props) {
         </Text>
       </TouchableOpacity>
 
+
+      <TouchableOpacity
+        style={styles.businessLink}
+        onPress={() => navigation.navigate('RegisterBusiness')}
+      >
+        <Text style={styles.registerText}>
+          ¿Eres un negocio? <Text style={styles.registerTextAccent}>Regístrate aquí</Text>
+        </Text>
+      </TouchableOpacity>
+
     </View>
   )
 }
@@ -134,5 +144,9 @@ const styles = StyleSheet.create({
   registerTextAccent: {
     color: '#4A90E2',
     fontWeight: 'bold',
+  },
+  businessLink: {
+    marginTop: 12,
+    alignItems: 'center',
   },
 })
