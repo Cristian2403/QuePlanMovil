@@ -35,9 +35,7 @@ export default function RegisterScreen({ navigation }: Props) {
         if (error) {
             Alert.alert('Error', error.message)
         } else {
-            Alert.alert('Éxito', 'Cuenta creada correctamente', [
-                { text: 'OK', onPress: () => navigation.navigate('Login') }
-            ])
+            Alert.alert('Éxito', 'Cuenta creada correctamente')
         }
     }
 

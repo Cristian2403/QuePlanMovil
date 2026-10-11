@@ -7,7 +7,8 @@ module.exports = {
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
     plugins: [
-    "expo-font"
+    "expo-font",
+    "expo-secure-store"
     ],
     splash: {
       image: "./assets/splash-icon.png",
