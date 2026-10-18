@@ -15,6 +15,8 @@ export type RootStackParamList = {
   Register: undefined
   RegisterBusiness: undefined
   Home: undefined
+  BusinessHome: undefined
+  AdminHome: undefined
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -22,31 +24,63 @@ const Stack = createNativeStackNavigator<RootStackParamList>()
 export default function AppNavigator() {
 
   const [session, setSession] = useState<Session | null>(null)
+  const [rol, setRol] = useState<string | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
 
+  const obtenerRol = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select('rol')
+      .eq('id_usuario', userId)
+      .single()
+
+    if (!error && data) {
+      setRol(data.rol)
+    }
+  }
+
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session}}) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
+      if (session) obtenerRol(session.user.id)
       setLoading(false)
     })
 
-    const { data: { subscription }} = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session)
+        if (session) {
+          obtenerRol(session.user.id)
+        } else {
+          setRol(null)
+        }
+      }
+    )
 
     return () => subscription.unsubscribe()
   }, [])
 
   if (loading) return null
 
+  const getInitialRoute = () => {
+    if (!session) return 'Login'
+    if (rol === 'negocio') return 'BusinessHome'
+    if (rol === 'administrador') return 'AdminHome'
+    return 'Home'
+  }
 
   return (
     <NavigationContainer>
       <Stack.Navigator
+        initialRouteName={getInitialRoute()}
         screenOptions={{ headerShown: false }}
       >
         {session ? (
-          <Stack.Screen name="Home" component={HomeScreen} />
+          <>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="BusinessHome" component={HomeScreen} />
+            <Stack.Screen name="AdminHome" component={HomeScreen} />
+          </>
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginScreen} />

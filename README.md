@@ -9,12 +9,18 @@ Aplicación móvil para explorar lugares de interés, crear planes de visita y c
 - **Supabase** (base de datos y autenticación)
 - **React Navigation** (navegación entre pantallas)
 - **Expo Secure Store** (sesión persistente)
+- **React Native Maps** (mapa interactivo)
+- **Google Maps API** (proveedor del mapa)
+- **EAS Build** (compilación para dispositivos físicos)
 
 ## Requisitos previos
 
 - Node.js instalado
-- Expo Go instalado en tu dispositivo móvil (versión 57)
+- Expo Go instalado en tu dispositivo móvil (versión 57)(esto puede que ya no se utilice)
 - Cuenta en Supabase
+- Cuenta en Expo
+- API Key de Google Maps
+
 
 ## Instalación
 
@@ -41,14 +47,20 @@ cp .env.example .env
 5. Agrega tus credenciales de Supabase en el archivo `.env`
 EXPO_PUBLIC_SUPABASE_URL=tu-url-de-supabase
 EXPO_PUBLIC_SUPABASE_KEY=tu-api-key
+GOOGLE_MAPS_API_KEY=tu-api-key-de-google-maps
+
+6. Instala el development build en tu celular Android
+
+   Descarga e instala el APK desde este link:
+   https://expo.dev/accounts/cristian2403/projects/queplan/builds/15a298df-2312-4a4f-ae49-0dc4af0ae604
 
 
-6. Ejecuta el proyecto
+7. Ejecuta el proyecto
 ```bash
-npx expo start
+npx expo start --dev-client
 ```
 
-7. Escanea el código QR con Expo Go desde tu dispositivo
+8. Escanea el QR con la app QuePlan instalada en tu celular
 
 ## Estructura del proyecto
 
@@ -61,6 +73,12 @@ QuePlan/
 ├── types/ # Tipos de TypeScript
 ├── App.tsx # Punto de entrada
 └── app.config.js # Configuración de Expo
+
+## Ramas
+
+- **main** — código estable y probado
+- **dev** — rama de desarrollo principal
+- **feature/map** — integración de Google Maps y development build
 
 
 ## Base de datos

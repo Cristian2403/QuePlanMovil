@@ -1,13 +1,8 @@
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+import { View, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native'
+import MapView from 'react-native-maps'
 import { supabase } from '../lib/supabase'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { RootStackParamList } from '../navigation/AppNavigator'
 
-type Props = {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>
-}
-
-export default function HomeScreen({ navigation }: Props) {
+export default function HomeScreen() {
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut()
@@ -18,9 +13,18 @@ export default function HomeScreen({ navigation }: Props) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Bienvenido a QuePlan</Text>
-      <TouchableOpacity style={styles.button} onPress={handleLogout}>
-        <Text style={styles.buttonText}>Cerrar sesión</Text>
+      <MapView
+        style={styles.map}
+        initialRegion={{
+          latitude: 6.2442,
+          longitude: -75.5812,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }}
+      />
+
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutText}>Cerrar sesión</Text>
       </TouchableOpacity>
     </View>
   )
@@ -29,27 +33,20 @@ export default function HomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 24,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 32,
+  map: {
+    flex: 1,
   },
-  button: {
+  logoutButton: {
+    position: 'absolute',
+    bottom: 32,
+    right: 24,
     backgroundColor: '#E74C3C',
     borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-    width: '100%',
+    padding: 12,
   },
-  buttonText: {
+  logoutText: {
     color: '#FFFFFF',
-    fontSize: 16,
     fontWeight: 'bold',
   },
 })
