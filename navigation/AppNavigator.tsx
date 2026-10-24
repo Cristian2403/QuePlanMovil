@@ -7,6 +7,8 @@ import { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import HomeScreen from '../screens/HomeScreen'
 import RegisterBusinessScreen from '../screens/RegisterBusinessScreen'
+import { Alert } from 'react-native'
+import AdminHomeScreen from '../screens/AdminHomeScreen'
 
 
 
@@ -26,6 +28,7 @@ export default function AppNavigator() {
   const [session, setSession] = useState<Session | null>(null)
   const [rol, setRol] = useState<string | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
+  const [loadingRol, setLoadingRol] = useState<boolean>(false)
 
   const obtenerRol = async (userId: string) => {
     const { data, error } = await supabase
@@ -35,14 +38,38 @@ export default function AppNavigator() {
       .single()
 
     if (!error && data) {
+      if (data.rol === 'negocio') {
+        const { data: negocio, error: negocioError } = await supabase
+          .from('negocios')
+          .select('estado')
+          .eq('id_usuario', userId)
+          .single()
+
+        if (!negocioError && negocio) {
+          if (negocio.estado === 'pendiente') {
+            Alert.alert('Solicitud pendiente', 'Tu negocio aún no ha sido aprobado por el administrador.')
+            await supabase.auth.signOut()
+            setLoadingRol(false)
+            return
+          } else if (negocio.estado === 'rechazado') {
+            Alert.alert('Solicitud rechazada', 'Tu negocio ha sido rechazado por el administrador.')
+            await supabase.auth.signOut()
+            setLoadingRol(false)
+            return
+          }
+        }
+      }
       setRol(data.rol)
     }
+    setLoadingRol(false)
   }
-
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
-      if (session) obtenerRol(session.user.id)
+      if (session) {
+        setLoadingRol(true)
+        obtenerRol(session.user.id)
+      }
       setLoading(false)
     })
 
@@ -50,9 +77,11 @@ export default function AppNavigator() {
       (_event, session) => {
         setSession(session)
         if (session) {
+          setLoadingRol(true)
           obtenerRol(session.user.id)
         } else {
           setRol(null)
+          setLoadingRol(false)
         }
       }
     )
@@ -60,7 +89,7 @@ export default function AppNavigator() {
     return () => subscription.unsubscribe()
   }, [])
 
-  if (loading) return null
+  if (loading || loadingRol) return null
 
   const getInitialRoute = () => {
     if (!session) return 'Login'
@@ -79,7 +108,7 @@ export default function AppNavigator() {
           <>
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="BusinessHome" component={HomeScreen} />
-            <Stack.Screen name="AdminHome" component={HomeScreen} />
+            <Stack.Screen name="AdminHome" component={AdminHomeScreen} />
           </>
         ) : (
           <>
