@@ -9,6 +9,8 @@ import HomeScreen from '../screens/HomeScreen'
 import RegisterBusinessScreen from '../screens/RegisterBusinessScreen'
 import { Alert } from 'react-native'
 import AdminHomeScreen from '../screens/AdminHomeScreen'
+import BusinessHomeScreen from '../screens/BusinessHomeScreen'
+import AddPlaceScreen from '../screens/AddPlaceScreen'
 
 
 
@@ -19,6 +21,7 @@ export type RootStackParamList = {
   Home: undefined
   BusinessHome: undefined
   AdminHome: undefined
+  AddPlace: undefined
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -107,8 +110,9 @@ export default function AppNavigator() {
         {session ? (
           <>
             <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="BusinessHome" component={HomeScreen} />
+            <Stack.Screen name="BusinessHome" component={BusinessHomeScreen} />
             <Stack.Screen name="AdminHome" component={AdminHomeScreen} />
+            <Stack.Screen name="AddPlace" component={AddPlaceScreen} />
           </>
         ) : (
           <>

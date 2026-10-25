@@ -52,8 +52,7 @@ GOOGLE_MAPS_API_KEY=tu-api-key-de-google-maps
 6. Instala el development build en tu celular Android
 
    Descarga e instala el APK desde este link:
-   https://expo.dev/accounts/cristian2403/projects/queplan/builds/15a298df-2312-4a4f-ae49-0dc4af0ae604
-
+   https://expo.dev/accounts/cristian2403/projects/queplan/builds/6f312d82-dc78-4059-a0a9-71b1db333359
 
 7. Ejecuta el proyecto
 ```bash
@@ -78,7 +77,7 @@ QuePlan/
 
 - **main** — código estable y probado
 - **dev** — rama de desarrollo principal
-- **feature/map** — integración de Google Maps y development build
+- **feature/map** — integración de Google Maps, mapa interactivo y módulo de lugares
 
 
 ## Base de datos
@@ -88,6 +87,7 @@ El proyecto usa Supabase con las siguientes tablas:
 - **usuarios** — registro e inicio de sesión
 - **negocios** — negocios registrados en la plataforma
 - **lugares** — puntos de interés en el mapa
+- **servicios** — servicios ofrecidos por cada lugar
 - **planes** — planes de visita creados por los usuarios
 - **plan_lugares** — lugares asociados a cada plan
 - **favoritos** — lugares guardados por los usuarios
