@@ -7,8 +7,12 @@ import { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import HomeScreen from '../screens/HomeScreen'
 import RegisterBusinessScreen from '../screens/RegisterBusinessScreen'
-
-
+import AdminHomeScreen from '../screens/admin/AdminHomeScreen'
+import MisPlanesScreen from '../screens/planes/MisPlanesScreen'
+import MapaScreen from '../screens/MapaScreen'
+import CrearPlanScreen from '../screens/planes/CrearPlanScreen' // NUEVO
+import { PlanBorradorProvider } from '../context/PlanBorradorContext'
+import PlanDetalleScreen from '../screens/planes/PlanDetalleScreen'
 
 export type RootStackParamList = {
   Login: undefined
@@ -17,6 +21,10 @@ export type RootStackParamList = {
   Home: undefined
   BusinessHome: undefined
   AdminHome: undefined
+  MisPlanes: undefined
+  CrearPlan: { idPlan?: number } | undefined
+  PlanDetalle: { idPlan: number }
+  
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -34,15 +42,13 @@ export default function AppNavigator() {
       .eq('id_usuario', userId)
       .single()
 
-    if (!error && data) {
-      setRol(data.rol)
-    }
+    setRol(!error && data ? data.rol : 'usuario')
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session)
-      if (session) obtenerRol(session.user.id)
+      if (session) await obtenerRol(session.user.id)
       setLoading(false)
     })
 
@@ -60,7 +66,7 @@ export default function AppNavigator() {
     return () => subscription.unsubscribe()
   }, [])
 
-  if (loading) return null
+  if (loading || (session && !rol)) return null
 
   const getInitialRoute = () => {
     if (!session) return 'Login'
@@ -70,25 +76,31 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName={getInitialRoute()}
-        screenOptions={{ headerShown: false }}
-      >
-        {session ? (
-          <>
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="BusinessHome" component={HomeScreen} />
-            <Stack.Screen name="AdminHome" component={HomeScreen} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen name="RegisterBusiness" component={RegisterBusinessScreen} />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+    // NUEVO: el "key" reinicia el borrador del plan al cambiar de usuario o cerrar sesión
+    <PlanBorradorProvider key={session?.user.id ?? 'anon'}>
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName={getInitialRoute()}
+          screenOptions={{ headerShown: false }}
+        >
+          {session ? (
+            <>
+              <Stack.Screen name="Home" component={MapaScreen} />
+              <Stack.Screen name="BusinessHome" component={HomeScreen} />
+              <Stack.Screen name="AdminHome" component={AdminHomeScreen} />
+              <Stack.Screen name="MisPlanes" component={MisPlanesScreen} />
+              <Stack.Screen name="CrearPlan" component={CrearPlanScreen} />
+              <Stack.Screen name="PlanDetalle" component={PlanDetalleScreen} />
+            </>
+          ) : (
+            <>
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="Register" component={RegisterScreen} />
+              <Stack.Screen name="RegisterBusiness" component={RegisterBusinessScreen} />
+            </>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </PlanBorradorProvider>
   )
 }
