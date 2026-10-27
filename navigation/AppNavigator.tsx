@@ -8,11 +8,18 @@ import { supabase } from '../lib/supabase'
 import HomeScreen from '../screens/HomeScreen'
 import RegisterBusinessScreen from '../screens/RegisterBusinessScreen'
 import { Alert } from 'react-native'
-import AdminHomeScreen from '../screens/AdminHomeScreen'
+import AdminHomeScreen from '../screens/admin/AdminHomeScreen'
 import BusinessHomeScreen from '../screens/BusinessHomeScreen'
 import AddPlaceScreen from '../screens/AddPlaceScreen'
-
-
+import MisPlanesScreen from '../screens/planes/MisPlanesScreen'
+import MapaScreen from '../screens/MapaScreen'
+import CrearPlanScreen from '../screens/planes/CrearPlanScreen'
+import { PlanBorradorProvider } from '../context/PlanBorradorContext'
+import PlanDetalleScreen from '../screens/planes/PlanDetalleScreen'
+import NotificacionesScreen from '../screens/NotificacionesScreen'
+import ExplorarPlanesScreen from '../screens/planes/ExplorarPlanesScreen'
+import ForosScreen from '../screens/foro/ForosScreen'
+import ForoDetalleScreen from '../screens/foro/ForoDetalleScreen'
 
 export type RootStackParamList = {
   Login: undefined
@@ -22,6 +29,13 @@ export type RootStackParamList = {
   BusinessHome: undefined
   AdminHome: undefined
   AddPlace: undefined
+  MisPlanes: undefined
+  CrearPlan: { idPlan?: number } | undefined
+  PlanDetalle: { idPlan: number }
+  ExplorarPlanes: undefined
+  Notificaciones: undefined
+  Foros: undefined
+  ForoDetalle: { idForo: number }
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -66,12 +80,13 @@ export default function AppNavigator() {
     }
     setLoadingRol(false)
   }
+
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session)
       if (session) {
         setLoadingRol(true)
-        obtenerRol(session.user.id)
+        await obtenerRol(session.user.id)
       }
       setLoading(false)
     })
@@ -102,26 +117,35 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName={getInitialRoute()}
-        screenOptions={{ headerShown: false }}
-      >
-        {session ? (
-          <>
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="BusinessHome" component={BusinessHomeScreen} />
-            <Stack.Screen name="AdminHome" component={AdminHomeScreen} />
-            <Stack.Screen name="AddPlace" component={AddPlaceScreen} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen name="RegisterBusiness" component={RegisterBusinessScreen} />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <PlanBorradorProvider key={session?.user.id ?? 'anon'}>
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName={getInitialRoute()}
+          screenOptions={{ headerShown: false }}
+        >
+          {session ? (
+            <>
+              <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen name="BusinessHome" component={BusinessHomeScreen} />
+              <Stack.Screen name="AdminHome" component={AdminHomeScreen} />
+              <Stack.Screen name="AddPlace" component={AddPlaceScreen} />
+              <Stack.Screen name="MisPlanes" component={MisPlanesScreen} />
+              <Stack.Screen name="CrearPlan" component={CrearPlanScreen} />
+              <Stack.Screen name="PlanDetalle" component={PlanDetalleScreen} />
+              <Stack.Screen name="ExplorarPlanes" component={ExplorarPlanesScreen} />
+              <Stack.Screen name="Notificaciones" component={NotificacionesScreen} />
+              <Stack.Screen name="Foros" component={ForosScreen} />
+              <Stack.Screen name="ForoDetalle" component={ForoDetalleScreen} />
+            </>
+          ) : (
+            <>
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="Register" component={RegisterScreen} />
+              <Stack.Screen name="RegisterBusiness" component={RegisterBusinessScreen} />
+            </>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </PlanBorradorProvider>
   )
 }
