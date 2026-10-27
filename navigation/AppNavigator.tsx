@@ -13,6 +13,10 @@ import MapaScreen from '../screens/MapaScreen'
 import CrearPlanScreen from '../screens/planes/CrearPlanScreen' // NUEVO
 import { PlanBorradorProvider } from '../context/PlanBorradorContext'
 import PlanDetalleScreen from '../screens/planes/PlanDetalleScreen'
+import NotificacionesScreen from '../screens/NotificacionesScreen'
+import ExplorarPlanesScreen from '../screens/planes/ExplorarPlanesScreen'
+import ForosScreen from '../screens/foro/ForosScreen'
+import ForoDetalleScreen from '../screens/foro/ForoDetalleScreen'
 
 export type RootStackParamList = {
   Login: undefined
@@ -24,6 +28,10 @@ export type RootStackParamList = {
   MisPlanes: undefined
   CrearPlan: { idPlan?: number } | undefined
   PlanDetalle: { idPlan: number }
+  ExplorarPlanes: undefined
+  Notificaciones: undefined
+  Foros: undefined
+  ForoDetalle: { idForo: number }
   
 }
 
@@ -91,6 +99,10 @@ export default function AppNavigator() {
               <Stack.Screen name="MisPlanes" component={MisPlanesScreen} />
               <Stack.Screen name="CrearPlan" component={CrearPlanScreen} />
               <Stack.Screen name="PlanDetalle" component={PlanDetalleScreen} />
+              <Stack.Screen name="ExplorarPlanes" component={ExplorarPlanesScreen} />
+              <Stack.Screen name="Notificaciones" component={NotificacionesScreen} />
+              <Stack.Screen name="Foros" component={ForosScreen} />
+              <Stack.Screen name="ForoDetalle" component={ForoDetalleScreen} />
             </>
           ) : (
             <>

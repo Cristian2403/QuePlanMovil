@@ -12,6 +12,8 @@ import { listarLugaresDisponibles } from '../lib/lugaresApi'
 import { formatearCOP } from '../lib/planesApi'
 import { usePlanBorrador } from '../context/PlanBorradorContext'
 import MenuFlotante, { ItemMenu } from '../components/MenuFlotante'
+import { useFocusEffect } from '@react-navigation/native'
+import { contarNoLeidas } from '../lib/notificacionesApi'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>
 
@@ -62,6 +64,12 @@ export default function MapaScreen({ navigation }: Props) {
   const [precio, setPrecio] = useState<number | null>(null)
   const [seleccionadoId, setSeleccionadoId] = useState<number | null>(null)
   const [menuAbierto, setMenuAbierto] = useState(false)
+  const [noLeidas, setNoLeidas] = useState(0)
+
+  
+  useFocusEffect(useCallback(() => {
+    contarNoLeidas().then(setNoLeidas).catch(() => {})
+  }, []))
 
   useEffect(() => {
     let activo = true
@@ -114,10 +122,10 @@ export default function MapaScreen({ navigation }: Props) {
   const itemsMenu: ItemMenu[] = [
     { label: 'Crear plan', onPress: () => navigation.navigate('CrearPlan') },
     { label: 'Mis planes', onPress: () => navigation.navigate('MisPlanes') },
-    { label: 'Explorar planes', onPress: proximamente('Explorar planes') },
-    { label: 'Foro', onPress: proximamente('El foro') },
+    { label: 'Explorar planes', onPress: () => navigation.navigate('ExplorarPlanes') },
+    { label: 'Foro', onPress: () => navigation.navigate('Foros') },
     { label: 'Favoritos', onPress: proximamente('Favoritos') },
-    { label: 'Notificaciones', onPress: proximamente('Notificaciones') },
+    { label: 'Notificaciones', onPress: () => navigation.navigate('Notificaciones') },
     { label: 'Cerrar sesión', destructive: true, onPress: () => { supabase.auth.signOut() } },
   ]
 
@@ -152,6 +160,7 @@ export default function MapaScreen({ navigation }: Props) {
         <View style={s.topRow}>
           <TouchableOpacity style={s.menuBtn} onPress={() => setMenuAbierto(true)}>
             <Text style={s.menuIcon}>☰</Text>
+            {noLeidas > 0 && <View style = {s.dot} />}
           </TouchableOpacity>
           <View style={s.pill}>
             <Text style={s.pillText}>{loading ? 'Buscando…' : `${lugares.length} lugares`}</Text>
@@ -229,6 +238,7 @@ const s = StyleSheet.create({
   cardDesc: { color: colors.text, fontSize: 14, marginTop: 8 },
   addBtn: { backgroundColor: colors.primary, borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 12 },
   addBtnOn: { backgroundColor: colors.border },
+    dot: { position: 'absolute', top: 9, right: 9, width: 10, height: 10, borderRadius: 5, backgroundColor: colors.danger },
   addText: { color: colors.text, fontWeight: 'bold', fontSize: 15 },
   planBar: { position: 'absolute', left: 16, right: 16, height: 52, backgroundColor: colors.success, borderRadius: 12, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   planBarText: { color: colors.text, fontWeight: 'bold', fontSize: 15 },

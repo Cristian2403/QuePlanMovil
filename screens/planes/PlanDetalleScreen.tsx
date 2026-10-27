@@ -9,6 +9,7 @@ import { colors } from '../../theme/colors'
 import { ModoTransporte, PlanDetalle } from '../../types/planes'
 import { usePlanBorrador } from '../../context/PlanBorradorContext'
 import { listarTodosLosLugares } from '../../lib/lugaresApi'
+import { copiarPlan } from '../../lib/explorarApi'
 import {
   obtenerPlan, eliminarPlan, formatearFecha, formatearHora, formatearCOP, ETIQUETA_TRANSPORTE,
 } from '../../lib/planesApi'
@@ -82,6 +83,19 @@ export default function PlanDetalleScreen({ navigation, route }: Props) {
         },
       },
     ])
+  }
+
+    const copiar = async () => {
+    try {
+      const nuevo = await copiarPlan(idPlan)
+      Alert.alert(
+        'Plan copiado',
+        'Lo guardamos en tus planes como borrador. Elige tu fecha y confírmalo cuando quieras.',
+        [{ text: 'Ver mi copia', onPress: () => navigation.replace('PlanDetalle', { idPlan: nuevo }) }]
+      )
+    } catch (e: any) {
+      Alert.alert('No se pudo copiar', e.message ?? 'Intenta de nuevo.')
+    }
   }
 
   const header = (
@@ -169,6 +183,14 @@ export default function PlanDetalleScreen({ navigation, route }: Props) {
           </TouchableOpacity>
           <TouchableOpacity style={[s.btn, borrando && { opacity: 0.5 }]} disabled={borrando} onPress={editar}>
             <Text style={s.btnText}>Editar</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+            {!esMio && (
+        <View style={[s.footer, { paddingBottom: 12 + insets.bottom }]}>
+          <TouchableOpacity style={s.btn} onPress={copiar}>
+            <Text style={s.btnText}>Copiar a mis planes</Text>
           </TouchableOpacity>
         </View>
       )}
