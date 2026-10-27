@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import { supabase } from '../lib/supabase'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { useFonts, Pacifico_400Regular } from '@expo-google-fonts/pacifico'
 import { RootStackParamList } from '../navigation/AppNavigator'
 
 
@@ -14,6 +15,7 @@ export default function RegisterScreen({ navigation }: Props) {
     const [nombre, setNombre] = useState<string>('')
     const [email, setEmail] = useState<string>('')
     const [contrasena, setContrasena] = useState<string>('')
+    const [fontsLoaded] = useFonts({ Pacifico_400Regular })
 
     const handleRegister = async () => {
         if (!nombre || !email || !contrasena) {
@@ -42,8 +44,8 @@ export default function RegisterScreen({ navigation }: Props) {
     return (
         <View style={styles.container}>
             <View style={styles.logoContainer}>
-                <Text style={[styles.logo, { fontFamily: 'Lobster_400Regular' }]}>¿Que</Text>
-                <Text style={[styles.logo, { fontFamily: 'Lobster_400Regular' }]}>Plan?</Text>
+                <Text style={[styles.logo, { fontFamily: 'Pacifico_400Regular' }]}> ¿Que </Text>
+                <Text style={[styles.logo, { fontFamily: 'Pacifico_400Regular' }]}> Plan? </Text>
             </View>
 
 
@@ -119,11 +121,18 @@ const styles = StyleSheet.create({
     },
     logoContainer: {
         alignItems: 'center',
+        justifyContent: 'center',
         marginBottom: 40,
+        width: '100%',
+
     },
     logo: {
         fontSize: 48,
         color: '#4A90E2',
-        lineHeight: 52,
+        lineHeight: 78,
+        textAlign: 'center',       // Obliga al texto a centrarse dentro de su propia caja
+        alignSelf: 'center',
+        overflow: 'visible', // Evita que Android corte los bordes del texto
+        minWidth: '100%',
     },
 })

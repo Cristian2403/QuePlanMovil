@@ -145,12 +145,19 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 40,
+    width: '100%',
+
   },
   logo: {
     fontSize: 48,
     color: '#4A90E2',
-    lineHeight: 52,
+    lineHeight: 78,
+    textAlign: 'center',       // Obliga al texto a centrarse dentro de su propia caja
+    alignSelf: 'center',
+    overflow: 'visible', // Evita que Android corte los bordes del texto
+    minWidth: '100%',
   },
   title: {
     fontSize: 28,
