@@ -10,9 +10,9 @@ import { ModoTransporte, PlanDetalle } from '../../types/planes'
 import { usePlanBorrador } from '../../context/PlanBorradorContext'
 import { listarTodosLosLugares } from '../../lib/lugaresApi'
 import { copiarPlan } from '../../lib/explorarApi'
-import {
-  obtenerPlan, eliminarPlan, formatearFecha, formatearHora, formatearCOP, ETIQUETA_TRANSPORTE,
-} from '../../lib/planesApi'
+import { obtenerPlan, eliminarPlan, formatearFecha, formatearHora, formatearCOP, ETIQUETA_TRANSPORTE, } from '../../lib/planesApi'
+import { Linking } from 'react-native'
+import * as Location from 'expo-location'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PlanDetalle'>
 
@@ -85,7 +85,7 @@ export default function PlanDetalleScreen({ navigation, route }: Props) {
     ])
   }
 
-    const copiar = async () => {
+  const copiar = async () => {
     try {
       const nuevo = await copiarPlan(idPlan)
       Alert.alert(
@@ -131,6 +131,48 @@ export default function PlanDetalleScreen({ navigation, route }: Props) {
   const textoEstado = plan.estado === 'activo' ? 'Confirmado' : plan.estado === 'borrador' ? 'Borrador'
     : plan.estado === 'completado' ? 'Completado' : plan.estado === 'cancelado' ? 'Cancelado' : (plan.estado ?? '')
 
+
+  const iniciarPlan = async () => {
+    if (plan.plan_lugares.length === 0) {
+      Alert.alert('Sin paradas', 'Este plan no tiene paradas.')
+      return
+    }
+
+    const { status } = await Location.requestForegroundPermissionsAsync()
+    if (status !== 'granted') {
+      Alert.alert('Error', 'Se necesita permiso de ubicación para iniciar el plan')
+      return
+    }
+
+    const pos = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Balanced
+    })
+
+    const origen = `${pos.coords.latitude},${pos.coords.longitude}`
+
+    const lugares = plan.plan_lugares
+      .filter(x => x.lugares)
+      .map(x => `${x.lugares!.latitud},${x.lugares!.longitud}`)
+
+    if (lugares.length === 0) return
+
+    const destino = lugares[lugares.length - 1]
+    const waypoints = lugares.slice(0, -1)
+
+    let url = `https://maps.google.com/maps?saddr=${origen}`
+
+    if (waypoints.length > 0) {
+      const todasLasParadas = [...waypoints, destino]
+      url += `&daddr=${todasLasParadas.join('+to:')}`
+    } else {
+      url += `&daddr=${destino}`
+    }
+
+    url += `&dirflg=d`
+
+    Linking.openURL(url)
+  }
+
   return (
     <View style={[s.container, { paddingTop: insets.top }]}>
       {header}
@@ -174,6 +216,13 @@ export default function PlanDetalleScreen({ navigation, route }: Props) {
             </View>
           </View>
         ))}
+
+        {plan.plan_lugares.length > 0 && (
+          <TouchableOpacity style={[s.btn, s.btnVerde]} onPress={iniciarPlan}>
+            <Text style={s.btnText}>Iniciar plan</Text>
+          </TouchableOpacity>
+        )}
+
       </ScrollView>
 
       {editable && (
@@ -187,7 +236,7 @@ export default function PlanDetalleScreen({ navigation, route }: Props) {
         </View>
       )}
 
-            {!esMio && (
+      {!esMio && (
         <View style={[s.footer, { paddingBottom: 12 + insets.bottom }]}>
           <TouchableOpacity style={s.btn} onPress={copiar}>
             <Text style={s.btnText}>Copiar a mis planes</Text>
@@ -223,4 +272,5 @@ const s = StyleSheet.create({
   btn: { flex: 1, backgroundColor: colors.primary, borderRadius: 10, padding: 15, alignItems: 'center' },
   btnDanger: { backgroundColor: colors.danger },
   btnText: { color: colors.text, fontWeight: 'bold', fontSize: 15 },
+  btnVerde: { backgroundColor: colors.success },
 })

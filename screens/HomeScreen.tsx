@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react'
-import { View, StyleSheet, TouchableOpacity, Text, Alert, TextInput, Modal, FlatList } from 'react-native'
+import { View, StyleSheet, TouchableOpacity, Text, Alert, TextInput, Modal, } from 'react-native'
 import MapView, { Marker } from 'react-native-maps'
 import { supabase } from '../lib/supabase'
 import PlaceBottomSheet from '../components/PlaceBottomSheet'
+import MenuFlotante, { ItemMenu } from '../components/MenuFlotante'
+import { usePlanBorrador } from '../context/PlanBorradorContext'
+import { NativeStackScreenProps } from '@react-navigation/native-stack'
+import { RootStackParamList } from '../navigation/AppNavigator'
+
+type Props = NativeStackScreenProps<RootStackParamList, 'Home'>
 
 type Lugar = {
   id_lugar: number
@@ -16,13 +22,16 @@ type Lugar = {
 
 type FiltroTipo = 'nombre' | 'categoria' | 'presupuesto'
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }: Props) {
   const [lugares, setLugares] = useState<Lugar[]>([])
   const [lugarSeleccionado, setLugarSeleccionado] = useState<Lugar | null>(null)
   const [busqueda, setBusqueda] = useState<string>('')
   const [filtroActivo, setFiltroActivo] = useState<FiltroTipo>('nombre')
   const [modalVisible, setModalVisible] = useState<boolean>(false)
+  const [menuAbierto, setMenuAbierto] = useState<boolean>(false)
   const [lugaresFiltradosPorPresupuesto, setLugaresFiltradosPorPresupuesto] = useState<number[]>([])
+
+  const { agregar, quitar, estaEnPlan, paradas } = usePlanBorrador()
 
   const obtenerLugares = async () => {
     const { data, error } = await supabase
@@ -53,27 +62,15 @@ export default function HomeScreen() {
 
   const lugaresFiltrados = lugares.filter((lugar) => {
     if (!busqueda) return true
-
-    if (filtroActivo === 'nombre') {
-      return lugar.nombre.toLowerCase().includes(busqueda.toLowerCase())
-    }
-
-    if (filtroActivo === 'categoria') {
-      return lugar.categoria.toLowerCase().includes(busqueda.toLowerCase())
-    }
-
-    if (filtroActivo === 'presupuesto') {
-      return lugaresFiltradosPorPresupuesto.includes(lugar.id_lugar)
-    }
-
+    if (filtroActivo === 'nombre') return lugar.nombre.toLowerCase().includes(busqueda.toLowerCase())
+    if (filtroActivo === 'categoria') return lugar.categoria.toLowerCase().includes(busqueda.toLowerCase())
+    if (filtroActivo === 'presupuesto') return lugaresFiltradosPorPresupuesto.includes(lugar.id_lugar)
     return true
   })
 
   const handleBusquedaChange = (texto: string) => {
     setBusqueda(texto)
-    if (filtroActivo === 'presupuesto') {
-      filtrarPorPresupuesto(texto)
-    }
+    if (filtroActivo === 'presupuesto') filtrarPorPresupuesto(texto)
   }
 
   const seleccionarFiltro = (filtro: FiltroTipo) => {
@@ -89,9 +86,7 @@ export default function HomeScreen() {
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut()
-    if (error) {
-      Alert.alert('Error', error.message)
-    }
+    if (error) Alert.alert('Error', error.message)
   }
 
   const getPlaceholder = () => {
@@ -107,6 +102,15 @@ export default function HomeScreen() {
     if (filtroActivo === 'presupuesto') return '💰 Presupuesto'
     return 'Filtros'
   }
+
+  const itemsMenu: ItemMenu[] = [
+    { label: 'Crear plan', onPress: () => navigation.navigate('CrearPlan') },
+    { label: 'Mis planes', onPress: () => navigation.navigate('MisPlanes') },
+    { label: 'Explorar planes', onPress: () => navigation.navigate('ExplorarPlanes') },
+    { label: 'Foro', onPress: () => navigation.navigate('Foros') },
+    { label: 'Notificaciones', onPress: () => navigation.navigate('Notificaciones') },
+    { label: 'Cerrar sesión', destructive: true, onPress: handleLogout },
+  ]
 
   useEffect(() => {
     obtenerLugares()
@@ -138,6 +142,12 @@ export default function HomeScreen() {
 
       {/* Barra de búsqueda y filtros */}
       <View style={styles.searchContainer}>
+        <TouchableOpacity
+          style={styles.menuBtn}
+          onPress={() => setMenuAbierto(true)}
+        >
+          <Text style={styles.menuIcon}>☰</Text>
+        </TouchableOpacity>
         <TextInput
           style={styles.searchInput}
           placeholder={getPlaceholder()}
@@ -154,6 +164,19 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Barra de plan activo */}
+      {paradas.length > 0 && (
+        <TouchableOpacity
+          style={styles.planBar}
+          onPress={() => navigation.navigate('CrearPlan')}
+        >
+          <Text style={styles.planBarTexto}>
+            Tu plan · {paradas.length} {paradas.length === 1 ? 'parada' : 'paradas'}
+          </Text>
+          <Text style={styles.planBarAccion}>Ver plan ›</Text>
+        </TouchableOpacity>
+      )}
+
       {/* Modal de filtros */}
       <Modal
         visible={modalVisible}
@@ -167,7 +190,6 @@ export default function HomeScreen() {
         >
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitulo}>Filtrar por</Text>
-
             {[
               { key: 'nombre', label: '🔤 Nombre' },
               { key: 'categoria', label: '🏷️ Categoría' },
@@ -193,13 +215,18 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </Modal>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Cerrar sesión</Text>
-      </TouchableOpacity>
-
       <PlaceBottomSheet
         lugar={lugarSeleccionado}
         onClose={() => setLugarSeleccionado(null)}
+        onAgregarPlan={agregar}
+        onQuitarPlan={quitar}
+        estaEnPlan={estaEnPlan}
+      />
+
+      <MenuFlotante
+        visible={menuAbierto}
+        onClose={() => setMenuAbierto(false)}
+        items={itemsMenu}
       />
     </View>
   )
@@ -219,6 +246,19 @@ const styles = StyleSheet.create({
     right: 16,
     flexDirection: 'row',
     gap: 8,
+  },
+  menuBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: '#1E1E1E',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+  },
+  menuIcon: {
+    color: '#FFFFFF',
+    fontSize: 20,
   },
   searchInput: {
     flex: 1,
@@ -241,6 +281,29 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 12,
+  },
+  planBar: {
+    position: 'absolute',
+    bottom: 24,
+    left: 16,
+    right: 16,
+    height: 52,
+    backgroundColor: '#2ECC71',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  planBarTexto: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  planBarAccion: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 15,
   },
   modalOverlay: {
     flex: 1,
@@ -274,18 +337,6 @@ const styles = StyleSheet.create({
     color: '#A0A0A0',
   },
   opcionFiltroTextoActivo: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-  },
-  logoutButton: {
-    position: 'absolute',
-    bottom: 32,
-    right: 24,
-    backgroundColor: '#E74C3C',
-    borderRadius: 8,
-    padding: 12,
-  },
-  logoutText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
   },
