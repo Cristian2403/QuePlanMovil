@@ -52,7 +52,7 @@ GOOGLE_MAPS_API_KEY=tu-api-key-de-google-maps
 6. Instala el development build en tu celular Android
 
    Descarga e instala el APK desde este link:
-   https://expo.dev/accounts/cristian2403/projects/queplan/builds/6f312d82-dc78-4059-a0a9-71b1db333359
+   https://expo.dev/accounts/cristian2403/projects/queplan/builds/22e84329-f047-40b2-924d-68b677dba8c3
 
 7. Ejecuta el proyecto
 ```bash
